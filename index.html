@@ -148,7 +148,7 @@ button.chip[aria-pressed="false"]{text-decoration:line-through;opacity:.55}
 .credit{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
 .credit strong{color:var(--ink);font-family:var(--serif);font-weight:600}
 </style>
-<!-- Google Analytics: replace G-XXXXXXXXXX with your Measurement ID (it appears twice) -->
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LC4YQ0E2S7"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -287,14 +287,14 @@ function opt(label, pressed, onclick, small){
 function renderSteps(){
   const pw=document.getElementById("progs"); pw.innerHTML="";
   PROGS.forEach(p=>pw.appendChild(opt(p.name, st.prog===p.id, ()=>{
-    if(st.prog!==p.id){ st.prog=p.id; st.sub=null; st.count=p.el; track("select_programme",{programme:p.name+(p.yr?" "+p.yr:"")}); }
+    if(st.prog!==p.id){ st.prog=p.id; st.sub=null; st.count=p.el; if(!p.subs) track("select_programme",{branch:branch()}); }
     prune(); save(); render();
   }, p.yr||"Choose stream")));
   const p=prog(), sw=document.getElementById("subWrap"), ss=document.getElementById("subs");
   ss.innerHTML="";
   if(p&&p.subs){
     sw.hidden=false; document.getElementById("subLab").textContent=p.subLab; ss.setAttribute("aria-label",p.subLab);
-    p.subs.forEach(s=>ss.appendChild(opt(s.name, st.sub===s.id, ()=>{ st.sub=s.id; track("select_stream",{programme:p.name,stream:s.name}); prune(); save(); render(); })));
+    p.subs.forEach(s=>ss.appendChild(opt(s.name, st.sub===s.id, ()=>{ st.sub=s.id; track("select_stream",{branch:branch()}); prune(); save(); render(); })));
   } else sw.hidden=true;
 
   const req=document.getElementById("req");
@@ -311,7 +311,7 @@ function renderSteps(){
 
   document.getElementById("s2").classList.toggle("off",!col());
   const cw=document.getElementById("counts"); cw.innerHTML="";
-  for(let n=1;n<=4;n++) cw.appendChild(opt(String(n), st.count===n, ()=>{ st.count=n; track("select_elective_count",{count:n}); st.picks=st.picks.slice(0,n); save(); render(); }, p&&n===p.el?"required":""));
+  for(let n=1;n<=4;n++) cw.appendChild(opt(String(n), st.count===n, ()=>{ st.count=n; track("select_elective_count",{count:n,branch:branch()}); st.picks=st.picks.slice(0,n); save(); render(); }, p&&n===p.el?"required":""));
   document.getElementById("s3").classList.toggle("off",!ready());
 }
 
@@ -430,8 +430,9 @@ function renderWeek(){
 }
 
 let tt; function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2200);}
+function branch(){ const p=prog(); if(!p) return ""; const s=subObj(); return p.name+(p.yr?" "+p.yr:"")+(s?" - "+s.name:""); }
 function track(name,params){ try{ if(typeof gtag==="function") gtag("event",name,params||{}); }catch(e){} }
-function add(id){ if(st.picks.length>=st.count) return; st.picks.push(id); track(st.picks.length===1?"choose_primary":"add_elective",{course:byId[id].title,programme:(prog()||{}).name||""}); if(st.picks.length===st.count) track("complete_selection",{count:st.count}); save(); if(st.picks.length===1) filter="fit"; render();
+function add(id){ if(st.picks.length>=st.count) return; st.picks.push(id); track(st.picks.length===1?"choose_primary":"add_elective",{course:byId[id].title,branch:branch()}); if(st.picks.length===st.count){ track("complete_selection",{count:st.count,branch:branch()}); st.picks.forEach(pid=>track("final_elective",{course:byId[pid].title,branch:branch()})); } save(); if(st.picks.length===1) filter="fit"; render();
   toast(st.picks.length===1?"Primary set. Showing electives that fit.":st.picks.length===st.count?"All electives chosen.":"Added to your week."); }
 function remove(id){ st.picks=st.picks.filter(x=>x!==id); delete st.skip[id]; save(); render(); toast("Removed."); }
 function render(){ renderSteps(); renderTray(); renderList(); renderWeek(); }
