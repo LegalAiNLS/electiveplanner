@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elective planner – Trimester II, 2026–27</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F5F3; --surface:#FFFFFF; --ink:#16231D; --muted:#5A6A62; --line:#D3DDD7;
+  --p1:#1E5B45; --p1-soft:#DCEDE5; --p2:#3F4FB0; --p2-soft:#E1E4F7; --p3:#9A5F0C; --p3-soft:#F6E8D2;
+  --p4:#8A2F6B; --p4-soft:#F4E1EE; --bad:#B3261E; --bad-soft:#FBE4E2; --ok:#1E6B3A;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1613; --surface:#18221D; --ink:#E6EEE9; --muted:#9AABA2; --line:#2C3A33;
+  --p1:#6FC9A2; --p1-soft:#1C3A2E; --p2:#9DA8F2; --p2-soft:#262C52; --p3:#E5B266; --p3-soft:#3D2E15;
+  --p4:#E59AC9; --p4-soft:#3D1F33; --bad:#F2978F; --bad-soft:#3E1F1C; --ok:#7FD39B; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#0F1613; --surface:#18221D; --ink:#E6EEE9; --muted:#9AABA2; --line:#2C3A33;
+  --p1:#6FC9A2; --p1-soft:#1C3A2E; --p2:#9DA8F2; --p2-soft:#262C52; --p3:#E5B266; --p3-soft:#3D2E15;
+  --p4:#E59AC9; --p4-soft:#3D1F33; --bad:#F2978F; --bad-soft:#3E1F1C; --ok:#7FD39B; color-scheme:dark;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 120px}
+header h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.15;margin:0 0 6px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:62ch}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--p2);outline-offset:2px}
+
+/* tray */
+.tray{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:24px 0 28px}
+.slot{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 18px;position:relative;min-height:92px;display:flex;flex-direction:column;gap:4px}
+.slot::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:5px;border-radius:0 4px 4px 0;background:var(--line)}
+.slot.k0::before{background:var(--p1)} .slot.k1::before{background:var(--p2)} .slot.k2::before{background:var(--p3)}
+.slot .role{font-size:.85rem;color:var(--muted)}
+.slot .t{font-family:var(--serif);font-weight:600;font-size:1.02rem;line-height:1.25}
+.slot .f{font-size:.85rem;color:var(--muted)}
+.slot.empty{border-style:dashed;background:transparent}
+.slot.empty .t{font-family:var(--sans);font-weight:400;color:var(--muted);font-size:.95rem}
+.slot .x{position:absolute;top:6px;right:6px;border:0;background:transparent;width:32px;height:32px;border-radius:8px;font-size:1.2rem;color:var(--muted)}
+.slot .x:hover{background:var(--paper);color:var(--ink)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1000px){.layout{grid-template-columns:minmax(0,5fr) minmax(0,6fr)} .week{position:sticky;top:calc(16px + env(safe-area-inset-top,0px));align-self:start}}
+h2{font-family:var(--serif);font-weight:600;font-size:1.35rem;margin:0 0 12px}
+
+/* controls */
+.controls{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{flex:1;border:0;background:transparent;padding:9px 6px;font-size:.92rem;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button:disabled{opacity:.45;cursor:default}
+.hint{font-size:.92rem;color:var(--muted);margin:0 0 10px}
+
+/* list */
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:start}
+.item.clash{background:transparent}
+.item.clash .ct{color:var(--muted)}
+.item.picked{border-color:var(--ink)}
+.ct{font-family:var(--serif);font-weight:600;font-size:1.05rem;line-height:1.3;margin:0}
+.fac{font-size:.88rem;color:var(--muted);margin:2px 0 0}
+.times{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.82rem;padding:3px 8px;border-radius:6px;background:var(--paper);border:1px solid var(--line);white-space:nowrap}
+.chip.hit{background:var(--bad-soft);border-color:var(--bad);color:var(--bad);font-weight:700}
+.status{grid-column:1/-1;font-size:.88rem;margin:0}
+.status.bad{color:var(--bad)} .status.ok{color:var(--ok)}
+.act{border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:8px;padding:7px 12px;font-size:.9rem;white-space:nowrap}
+.act.ghost{background:transparent;color:var(--ink)}
+.act:disabled{opacity:.35;cursor:not-allowed}
+.empty-list{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}
+
+/* week grid */
+.weekhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.weekhead p{margin:0 0 12px;color:var(--muted);font-size:.92rem}
+.gridwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:720px;table-layout:fixed}
+th,td{border-bottom:1px solid var(--line);border-left:1px solid var(--line);padding:6px;vertical-align:top;text-align:left}
+tr>*:first-child{border-left:0} tbody tr:last-child>*{border-bottom:0}
+thead th{font-size:.85rem;font-weight:700;padding:10px 8px;background:var(--paper)}
+tbody th{font-weight:400;font-size:.8rem;color:var(--muted);width:78px;line-height:1.3;padding:10px 8px}
+td{height:92px}
+td.na{background:repeating-linear-gradient(135deg,transparent 0 6px,var(--line) 6px 7px);opacity:.5}
+.cls{border-radius:7px;padding:7px 8px;height:100%;overflow-wrap:break-word;hyphens:auto;font-size:.8rem;line-height:1.25;border-left:4px solid}
+.cls b{display:block;font-family:var(--serif);font-weight:600;font-size:.84rem;margin-bottom:3px}
+.c0{background:var(--p1-soft);border-color:var(--p1)} .c1{background:var(--p2-soft);border-color:var(--p2)} .c2{background:var(--p3-soft);border-color:var(--p3)}
+.agenda{display:none}
+@media (max-width:640px){
+  .gridwrap{display:none} .agenda{display:flex;flex-direction:column;gap:10px}
+  .tray{grid-template-columns:1fr;gap:8px} .slot{min-height:0}
+}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.day h3{margin:0 0 6px;font-size:.95rem}
+.day .cls{margin-top:6px}
+.day .free{color:var(--muted);font-size:.88rem}
+.clear{border:0;background:transparent;color:var(--muted);text-decoration:underline;font-size:.9rem;padding:4px}
+
+/* bottom bar (mobile) */
+.bar{display:none}
+@media (max-width:999px){
+  .bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--ink);color:var(--paper);
+  padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));align-items:center;justify-content:space-between;gap:12px}
+  .bar button{background:var(--paper);color:var(--ink);border:0;border-radius:8px;padding:8px 14px;font-weight:700}
+}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:6;max-width:90vw}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+.step{margin:22px 0 0;padding:18px 0 0;border-top:1px solid var(--line)}
+.step h2{display:flex;gap:10px;align-items:baseline}
+.step h2 .n{font-family:var(--sans);font-size:.85rem;font-weight:700;color:var(--paper);background:var(--ink);border-radius:50%;width:24px;height:24px;display:inline-grid;place-items:center;flex:none;transform:translateY(-2px)}
+.step.off{opacity:.45;pointer-events:none}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-size:.95rem;text-align:left;min-width:56px;align-self:stretch}
+.opt[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.opt small{display:block;font-size:.78rem;opacity:.8}
+.sub{margin-top:14px}
+.sub .lab{font-size:.9rem;color:var(--muted);margin:0 0 6px}
+.req{margin:12px 0 0;font-size:.92rem;color:var(--muted);max-width:70ch}
+.tags{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.78rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.conc{border-color:var(--p1);color:var(--p1);font-weight:700}
+.tag.prac{border-color:var(--p3);color:var(--p3);font-weight:700}
+.note{grid-column:1/-1;font-size:.84rem;color:var(--muted);margin:0}
+button.chip{cursor:pointer;font:inherit;font-size:.82rem;color:inherit}
+button.chip[aria-pressed="false"]{text-decoration:line-through;opacity:.55}
+.rules{display:flex;flex-wrap:wrap;gap:8px 18px;margin:-14px 0 24px;font-size:.92rem}
+.rules span.done{color:var(--ok);font-weight:700}
+.tray{grid-template-columns:repeat(var(--n,3),minmax(0,1fr))}
+@media (max-width:900px){.tray{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.tray{grid-template-columns:1fr}}
+.c3{background:var(--p4-soft);border-color:var(--p4)}
+.slot.k3::before{background:var(--p4)}
+.nott{margin-top:12px}
+.byline{display:inline-flex;align-items:center;gap:12px;margin:0 0 18px;padding:8px 16px 8px 8px;border:1px solid var(--p1);border-radius:999px;background:var(--p1-soft);font-size:.95rem;line-height:1.3}
+.byline .mark{width:40px;height:40px;border-radius:50%;background:var(--p1);color:var(--paper);display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:1rem;flex:none}
+.byline strong{font-family:var(--serif);font-weight:600;font-size:1.08rem}
+.byline em{font-style:normal;color:var(--p1)}
+.credit{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
+.credit strong{color:var(--ink);font-family:var(--serif);font-weight:600}
+</style>
+<!-- Google Analytics: replace G-XXXXXXXXXX with your Measurement ID (it appears twice) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="byline"><span class="mark" aria-hidden="true">RD</span><span>Developed by <strong>Rakshit Dwaram</strong><br><em>Building tools to make law easier</em></span></div>
+    <h1>Plan your Trimester II electives</h1>
+    <p>Choose your programme and how many electives you’re taking, then pick a primary. You’ll only see electives open to your programme, sorted into ones that fit and ones that clash.</p>
+  </header>
+
+  <section class="step" id="s1" aria-labelledby="h1s">
+    <h2 id="h1s"><span class="n">1</span>Your programme</h2>
+    <div class="opts" id="progs" role="group" aria-label="Programme"></div>
+    <div class="sub" id="subWrap" hidden><p class="lab" id="subLab"></p><div class="opts" id="subs" role="group"></div></div>
+    <p class="req" id="req"></p>
+  </section>
+
+  <section class="step off" id="s2" aria-labelledby="h2s">
+    <h2 id="h2s"><span class="n">2</span>How many electives?</h2>
+    <div class="opts" id="counts" role="group" aria-label="Number of electives"></div>
+  </section>
+
+  <section class="step off" id="s3" aria-labelledby="h3s">
+    <h2 id="h3s"><span class="n">3</span>Pick your electives</h2>
+    <div class="tray" id="tray" aria-label="Your picks"></div>
+    <div class="rules" id="rules"></div>
+    <div class="layout">
+      <section aria-labelledby="lh">
+        <h2 id="lh">Open to you</h2>
+        <div class="controls">
+          <input class="search" id="q" type="search" placeholder="Search by course or faculty" aria-label="Search electives">
+          <div class="seg" role="group" aria-label="Filter">
+            <button data-f="fit" aria-pressed="false">Fits</button>
+            <button data-f="clash" aria-pressed="false">Clashes</button>
+            <button data-f="all" aria-pressed="true">All</button>
+          </div>
+        </div>
+        <p class="hint" id="hint"></p>
+        <ul class="list" id="list"></ul>
+      </section>
+      <section class="week" id="week" aria-labelledby="wh">
+        <div class="weekhead"><h2 id="wh">Your week</h2><button class="clear" id="clear">Clear all picks</button></div>
+        <p class="hint" id="weeksum"></p>
+        <div class="gridwrap"><table id="grid"></table></div>
+        <div class="agenda" id="agenda"></div>
+        <div class="nott" id="nott"></div>
+      </section>
+    </div>
+  </section>
+  <footer class="credit">Developed by <strong>Rakshit Dwaram</strong>, building tools to make law easier.</footer>
+</div>
+<div class="bar" id="bar"><span id="barTxt"></span><button id="barBtn">View timetable</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>const DATA = [{"id":48,"title":"A Genealogy of Transgender Law in Context","faculty":"Mihir Rajamane","cr":2,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Tue","t":"5:10","room":"NAB-103"},{"d":"Fri","t":"5:10","room":"NAB-103"}]},{"id":27,"title":"Actor as Creator: The Art of Putting Things Together","faculty":"Bikram Ghosh","cr":4,"conc":"","survey":false,"practice":true,"clinical":false,"el":["BA (Hons.) History","BA (Hons.) Economics","BA (Hons.) Politics","BA (Hons.) Sociology"],"s":[{"d":"Mon","t":"5:10","room":"OAB-105"},{"d":"Thu","t":"5:10","room":"OAB-101"}]},{"id":14,"title":"Advanced Econometrics","faculty":"Somashekhar T","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"NAB-104"},{"d":"Thu","t":"2:00","room":"NAB-104"}]},{"id":16,"title":"Affirmative Action in the 21st Century: Pushback, Support and Comparative Legal Analysis","faculty":"Almas Shaikh","cr":4,"conc":"Public*","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-204"},{"d":"Thu","t":"5:10","room":"NAB-204"}]},{"id":30,"title":"Anti- Money Laundering Enforcement in India: Investigation and Asset Recovery","faculty":"Jacob Joseph","cr":2,"conc":"Criminal, Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"NAB-205"},{"d":"Thu","t":"2:00","room":"NAB-205"}]},{"id":37,"title":"Anti-Caste Political Thought: Political Contours and Social Vision","faculty":"Ganeshwar","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) Politics","BA (Hons.) Sociology","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"OAB-104 / OAB-105"},{"d":"Fri","t":"2:00","room":"OAB-104"}]},{"id":25,"title":"Atypical Families and the Law: Concepts, Dilemmas & Challenges","faculty":"Diksha Sanyal","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"5:10","room":"OAB-102"},{"d":"Fri","t":"5:10","room":"Library CR-01"}]},{"id":3,"title":"Citizenship and Immigration Law","faculty":"Darshana Mitra","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"OAB-102"},{"d":"Thu","t":"5:10","room":"OAB-102"}]},{"id":21,"title":"Citizenship and Statelessness Clinic- II (Drafting and Research)","faculty":"Mohammed Afeef & Darshana Mitra","cr":2,"conc":"","survey":false,"practice":false,"clinical":true,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th"],"s":[]},{"id":56,"title":"Civil Fraud","faculty":"Rishabh Raheja","cr":4,"conc":"Commercial","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-105"},{"d":"Thu","t":"5:10","room":"NAB-105"},{"d":"Sat","t":"11:10","room":"OAB-101"}]},{"id":7,"title":"Climate Litigation: Methods and Practices","faculty":"Lianne D'Souza","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"NAB-202"},{"d":"Thu","t":"2:00","room":"NAB-202"}]},{"id":54,"title":"Comparative Urbanization and Development: A View from the Global South","faculty":"Vivek Mishra","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) Economics","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"NAB-102"},{"d":"Fri","t":"2:00","room":"NAB-102"}]},{"id":44,"title":"Competition Law and Digital Platforms","faculty":"Shruti Aji Murali & Shashank Sharma","cr":4,"conc":"Commercial, Law & Tech","survey":false,"practice":false,"clinical":true,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law","LLM Law and Tech"],"s":[{"d":"Tue","t":"5:10","room":"NAB-104"},{"d":"Fri","t":"5:10","room":"NAB-104"}]},{"id":2,"title":"Contemporary Armed Conflict and International Law","faculty":"Arnav Sharma","cr":4,"conc":"Public*","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"OAB-104"},{"d":"Thu","t":"2:00","room":"OAB-104"}]},{"id":57,"title":"Contemporary IHL in Asia: Evolving Means and Methods of Warfare","faculty":"Harshita Anand","cr":4,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-001"},{"d":"Thu","t":"5:10","room":"OAB-207"}]},{"id":71,"title":"Corporations, Human Rights, and the Environment","faculty":"Sugandha Yadav","cr":4,"conc":"Commercial, Public","survey":false,"practice":false,"clinical":false,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law","LLM Public Law"],"s":[{"d":"Tue","t":"5:10","room":"NAB-202"},{"d":"Wed","t":"5:10","room":"OAB-206"},{"d":"Fri","t":"5:10","room":"NAB-202"},{"d":"Sat","t":"9:00","room":"OAB-104"}]},{"id":20,"title":"Criminal Justice","faculty":"Ragini Ahuja & Hrishika Jain","cr":2,"conc":"","survey":false,"practice":false,"clinical":true,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th"],"s":[{"d":"Tue","t":"5:10","room":"OAB-307"}]},{"id":5,"title":"Cross-Border Lawyering","faculty":"Govindraj Hegde","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"OAB-201"},{"d":"Tue","t":"5:10","room":"NAB-105"}]},{"id":6,"title":"Cultures of Resistance: Visual and Aural cultures in South Asia","faculty":"Karthikeyan D","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-101"},{"d":"Thu","t":"5:10","room":"OAB-105"}]},{"id":72,"title":"Data Science and Artificial Intelligence for Real World Problem Solving","faculty":"Vijay Pandey","cr":4,"conc":"","survey":false,"practice":true,"clinical":false,"el":["BA (Hons.) History","BA (Hons.) Economics","BA (Hons.) Politics","BA (Hons.) Sociology","MPP"],"s":[{"d":"Tue","t":"2:00","room":"OAB-103"},{"d":"Wed","t":"5:10","room":"OAB-307"},{"d":"Fri","t":"2:00","room":"OAB-103"},{"d":"Sat","t":"9:00","room":"OAB-201"}]},{"id":10,"title":"Decoding Community Intellectual Property Regimes","faculty":"Sulok SK","cr":4,"conc":"Law & Tech*","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Law and Tech"],"s":[{"d":"Mon","t":"2:00","room":"OAB-103"},{"d":"Thu","t":"2:00","room":"OAB-103"}]},{"id":61,"title":"Digital Forensics and Electronic Evidence: Principles, Practice, and Admissibility in Indian Courts","faculty":"Jason Conley","cr":4,"conc":"Criminal, Law & Tech","survey":false,"practice":false,"clinical":true,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal","LLM Law and Tech"],"s":[{"d":"Tue","t":"2:00","room":"OAB-101"},{"d":"Fri","t":"2:00","room":"OAB-101"}]},{"id":67,"title":"Economy and Society: Key Texts and Concepts","faculty":"Anush Kapadia","cr":2,"conc":"Commercial","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Commercial Law"],"s":[{"d":"Mon","t":"5:10","room":"OAB-103"},{"d":"Thu","t":"5:10","room":"OAB-103"}]},{"id":63,"title":"Foundational Perspectives on AI for Public Policy","faculty":"Rajesh Hanbal","cr":2,"conc":"Law & Tech","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Law and Tech"],"s":[{"d":"Fri","t":"5:10","room":"OAB-207"},{"d":"Sat","t":"9:00","room":"OAB-102"}]},{"id":34,"title":"Foundations of external commercial borrowings by Indian companies","faculty":"Anshita Chauhan","cr":2,"conc":"Commercial","survey":false,"practice":false,"clinical":true,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Mon","t":"2:00","room":"OAB-201"},{"d":"Tue","t":"2:00","room":"NAB-103"},{"d":"Thu","t":"2:00","room":"OAB-201"},{"d":"Fri","t":"2:00","room":"NAB-103"}]},{"id":53,"title":"From Civil Liberties to Human Rights: Historicizing Protest Rights in India","faculty":"Amit Upadhyay","cr":4,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) History","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Public Law"],"s":[{"d":"Fri","t":"5:10","room":"OAB-206"},{"d":"Sat","t":"9:00","room":"OAB-101"}]},{"id":22,"title":"From Factory Floor to Court: Labour Law in Action","faculty":"Anusha R & Aditi Thakur","cr":2,"conc":"","survey":false,"practice":false,"clinical":true,"el":["BALLB4th","BALLB5th"],"s":[{"d":"Mon","t":"5:10","room":"OAB-104"}]},{"id":0,"title":"From Invention to Validity: Assessing Patents through Prior Art and Patentability","faculty":"Zakir Thomas; Apoorv Kumar Chowdhary","cr":4,"conc":"Law & Tech","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Law and Tech"],"s":[{"d":"Tue","t":"2:00","room":"NAB-104"},{"d":"Fri","t":"2:00","room":"NAB-104"}]},{"id":26,"title":"Games & Decisions","faculty":"Suryaprakash Mishra","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"5:10","room":"OAB-101"},{"d":"Wed","t":"5:10","room":"NAB-105"}]},{"id":45,"title":"Gender and Development: Feminist Perspectives on Theory, Policy and Practice","faculty":"Taanya Kapoor","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) Economics","BA (Hons.) Sociology","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"NAB-002"},{"d":"Fri","t":"2:00","room":"NAB-002"}]},{"id":12,"title":"Gender, Violence and the Law","faculty":"Nikita Ahalyan","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"NAB-105"},{"d":"Fri","t":"2:00","room":"NAB-105"}]},{"id":60,"title":"Global Health Law - International Negotiations Clinic","faculty":"Sachin Sathyarajan","cr":4,"conc":"Public","survey":false,"practice":false,"clinical":true,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"OAB-207"},{"d":"Thu","t":"2:00","room":"OAB-207"}]},{"id":64,"title":"How To Bring Policy Closer To People","faculty":"Vijayendra Rao","cr":2,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"NAB-102"},{"d":"Thu","t":"2:00","room":"NAB-102"}]},{"id":40,"title":"India-Pakistan Relations: Social, Cultural, & Comparative Perspectives","faculty":"Sridhar Krishnan","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) History","BA (Hons.) Politics","BA (Hons.) Sociology","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-104"},{"d":"Thu","t":"5:10","room":"NAB-104"}]},{"id":24,"title":"Indira is India: Understanding India’s First Dictatorship","faculty":"Vanya Vaidehi Bhargav","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"OAB-307"},{"d":"Fri","t":"2:00","room":"OAB-207"}]},{"id":19,"title":"Intellectual Property Laws","faculty":"Arul Scaria & Betsy Rajasingh","cr":4,"conc":"","survey":true,"practice":false,"clinical":false,"el":["LLB 2","LLB 3","LLM Law and Tech"],"s":[{"d":"Tue","t":"2:00","room":"LIBRARY CR-01 / OAB-206"},{"d":"Thu","t":"2:00","room":"LIBRARY CR-01 / OAB-301"},{"d":"Fri","t":"2:00","room":"LIBRARY CR-01 / OAB-201"}]},{"id":51,"title":"International Investment Law and Arbitration","faculty":"Divyanshu Agrawal","cr":4,"conc":"Commercial","survey":false,"practice":false,"clinical":false,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Tue","t":"2:00","room":"OAB-301"},{"d":"Wed","t":"5:10","room":"Library CR-01"},{"d":"Fri","t":"2:00","room":"OAB-301"}]},{"id":65,"title":"International Law of Military Operations: Law, Strategy and the Use of Force","faculty":"Sudhir Pillai","cr":4,"conc":"Criminal, Commercial, Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal","LLM Commercial Law","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"NAB-202"},{"d":"Fri","t":"2:00","room":"NAB-202"}]},{"id":23,"title":"Juvenile Justice","faculty":"Madhubanti Sadya & Amadhi Devaraj","cr":2,"conc":"","survey":false,"practice":false,"clinical":true,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th"],"s":[{"d":"Thu","t":"2:00","room":"Library CR-01"}]},{"id":35,"title":"Law and Moral Disagreement in Constitutional Democracies","faculty":"Pritam Baruah","cr":4,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) Politics","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Wed","t":"5:10","room":"NAB-203"},{"d":"Fri","t":"2:00","room":"OAB-307"}]},{"id":1,"title":"Law, Terror and State Power","faculty":"Mayur Suresh","cr":4,"conc":"Criminal*","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal"],"s":[{"d":"Mon","t":"2:00","room":"NAB-203"},{"d":"Thu","t":"2:00","room":"NAB-203"}]},{"id":9,"title":"Law-and-Economics","faculty":"Rahul Singh","cr":4,"conc":"Commercial*","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Commercial Law"],"s":[{"d":"Mon","t":"2:00","room":"OAB-301"},{"d":"Thu","t":"2:00","room":"OAB-307"}]},{"id":17,"title":"Legal foundations of the democratic process in India","faculty":"Manish","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":[],"s":[{"d":"Tue","t":"2:00","room":"ALLEN & OVERY"},{"d":"Fri","t":"2:00","room":"OAB-206"}]},{"id":52,"title":"Logic, argumentation, and rhetoric - A systematic approach to building, countering, and presenting arguments","faculty":"Vikram Hegde","cr":2,"conc":"","survey":false,"practice":false,"clinical":true,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP"],"s":[{"d":"Mon","t":"2:00","room":"OAB-105"},{"d":"Thu","t":"2:00","room":"OAB-105"},{"d":"Sat","t":"9:00","room":"OAB-206"}]},{"id":43,"title":"National Security and International Law","faculty":"Himanil Raina","cr":2,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"OAB-207"},{"d":"Tue","t":"5:10","room":"OAB-201"},{"d":"Wed","t":"5:10","room":"OAB-105"},{"d":"Thu","t":"5:10","room":"NAB-002"},{"d":"Fri","t":"5:10","room":"OAB-105"}]},{"id":13,"title":"Non-Verbal Communication and Theatrical Expression","faculty":"Manish Patel","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"LIBRARY CR-01"},{"d":"Thu","t":"2:00","room":"NAB-001"}]},{"id":39,"title":"Operationalising Climate Change Litigation","faculty":"Ashwin Murthy and Siddharth Aiyanna","cr":2,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Tue","t":"5:10","room":"OAB-207"},{"d":"Wed","t":"5:10","room":"OAB-101"},{"d":"Fri","t":"5:10","room":"OAB-307"}]},{"id":29,"title":"Philosophical Foundations of Property Law","faculty":"Amitpal C. Singh","cr":2,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-203"},{"d":"Tue","t":"5:10","room":"NAB-204"},{"d":"Wed","t":"5:10","room":"OAB-201"},{"d":"Thu","t":"5:10","room":"NAB-203"},{"d":"Fri","t":"5:10","room":"NAB-204"}]},{"id":32,"title":"Practical aspects of Arbitration- A practitioner's view","faculty":"Srikant Parthasarathy","cr":2,"conc":"Commercial","survey":false,"practice":false,"clinical":true,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Tue","t":"5:10","room":"Library CR-01 / NAB-205"},{"d":"Fri","t":"5:10","room":"OAB-104"}]},{"id":36,"title":"Practical Aspects of Goods & Service Tax Law","faculty":"Vinamar Gupta","cr":4,"conc":"Commercial","survey":false,"practice":false,"clinical":true,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM Commercial Law"],"s":[{"d":"Tue","t":"2:00","room":"NAB-203"},{"d":"Fri","t":"2:00","room":"NAB-203"}]},{"id":70,"title":"Quest for AI Sovereignty: Evaluating India's Strategic Choices in a Fractured Global Order","faculty":"Sreekanth Reddy Mukku","cr":2,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"NAB-105"},{"d":"Thu","t":"2:00","room":"NAB-105"}]},{"id":15,"title":"Reading India's Urban Histories","faculty":"Anwesha Ghosh","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"OAB-201"},{"d":"Fri","t":"2:00","room":"OAB-105"}]},{"id":68,"title":"Regions in the Making: Karnataka’s Modern Past","faculty":"Janaki Nair","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) History","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"NAB-101"},{"d":"Fri","t":"2:00","room":"NAB-101"}]},{"id":28,"title":"Regulation & Markets: Balancing Innovation, Capital and Ethics","faculty":"Vidhyashankar Sathya","cr":2,"conc":"Commercial","survey":false,"practice":false,"clinical":true,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Tue","t":"2:00","room":"NAB-204"},{"d":"Fri","t":"2:00","room":"NAB-204"}]},{"id":18,"title":"Regulatory Governance: Local to Global","faculty":"Manpreet Singh","cr":4,"conc":"","survey":true,"practice":false,"clinical":false,"el":["BALLB5th","LLM General"],"s":[]},{"id":4,"title":"Reproduction, Parenthood and the Law","faculty":"Deeksha Balaji","cr":4,"conc":"Public*","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-205"},{"d":"Thu","t":"5:10","room":"NAB-205"}]},{"id":46,"title":"Reproductive Justice: A political framework","faculty":"Alankrita Anand","cr":2,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"OAB-102"},{"d":"Wed","t":"5:10","room":"OAB-102"},{"d":"Fri","t":"2:00","room":"OAB-102"}]},{"id":41,"title":"Rethinking Adult Relationships: Questioning and Queering the Principles of Family Law","faculty":"Jwalika Balaji","cr":2,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"LIBRARY CR-01"},{"d":"Tue","t":"5:10","room":"OAB-105"},{"d":"Thu","t":"5:10","room":"LIBRARY CR-01"},{"d":"Fri","t":"5:10","room":"NAB-203"}]},{"id":31,"title":"Selected Themes in the Philosophy of Criminal Law","faculty":"Shraddha Chaudhary","cr":4,"conc":"Criminal","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Criminal"],"s":[{"d":"Tue","t":"5:10","room":"NAB-102"},{"d":"Fri","t":"5:10","room":"OAB-201"}]},{"id":58,"title":"Sports and Courts - Sports Administration and Rule Interpretation","faculty":"Aditya Verma","cr":2,"conc":"Commercial","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-002"},{"d":"Thu","t":"5:10","room":"NAB-102"}]},{"id":42,"title":"Stakeholder Analysis: Theory and Practice","faculty":"Sridhar Pabbisetty & Ajit Phadnis","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) Economics","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"OAB-206"},{"d":"Tue","t":"5:10","room":"OAB-103"},{"d":"Wed","t":"5:10","room":"OAB-104"},{"d":"Thu","t":"5:10","room":"OAB-307"},{"d":"Fri","t":"5:10","room":"OAB-103"}]},{"id":33,"title":"The ABCs of Asian Constitutionalism","faculty":"Anshul Dalmia","cr":2,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-103"},{"d":"Tue","t":"5:10","room":"OAB-104"},{"d":"Thu","t":"5:10","room":"NAB-103"},{"d":"Fri","t":"5:10","room":"NAB-205"}]},{"id":62,"title":"The Company in Practice: A Transactional Lawyer’s Toolkit","faculty":"Rachita Nadig","cr":4,"conc":"Commercial","survey":false,"practice":false,"clinical":true,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Mon","t":"2:00","room":"NAB-002"},{"d":"Thu","t":"2:00","room":"NAB-002"}]},{"id":50,"title":"The Energy Security Conundrum: Critical Minerals and International Economic Law","faculty":"Ashutosh Kashyap","cr":4,"conc":"Commercial, Law & Tech","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law","LLM Law and Tech"],"s":[{"d":"Tue","t":"5:10","room":"NAB-002"},{"d":"Fri","t":"5:10","room":"NAB-002"}]},{"id":11,"title":"The Founder’s Legal Guide to Fundraising: Law, Deals & Practice in the Indian Startup Ecosystem","faculty":"Neela Badami","cr":4,"conc":"Commercial*","survey":false,"practice":false,"clinical":false,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Mon","t":"2:00","room":"OAB-101"},{"d":"Thu","t":"2:00","room":"OAB-101"}]},{"id":69,"title":"The Queer archive, Law and Expressive Cultures","faculty":"Arvind Narrain, Balakrishnan Raghavan and T Jayashree","cr":4,"conc":"Public","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) History","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"NAB-204"},{"d":"Thu","t":"2:00","room":"NAB-204"}]},{"id":47,"title":"Theories of Power and Opposition","faculty":"Uday Yerramadasu","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) Politics","BA (Hons.) Sociology","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"OAB-307"},{"d":"Thu","t":"2:00","room":"NAB-103"}]},{"id":49,"title":"Tragedy as Ethical Instantiations","faculty":"Vighnesh Hampapura","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) History","BA (Hons.) Sociology","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"5:10","room":"NAB-202"},{"d":"Wed","t":"5:10","room":"NAB-205"}]},{"id":66,"title":"Understanding the Role of a Transactional Lawyer","faculty":"Niharika Sharma","cr":2,"conc":"Commercial","survey":false,"practice":false,"clinical":true,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM Commercial Law"],"s":[{"d":"Tue","t":"2:00","room":"OAB-207"},{"d":"Wed","t":"5:10","room":"OAB-CSSEIP"},{"d":"Fri","t":"2:00","room":"Allen & Overy"},{"d":"Sat","t":"11:10","room":"OAB-102"}]},{"id":59,"title":"Understanding ‘The Crowd’ in History and Culture: The Politics and Poetics of Assembly","faculty":"FIRDAUS SONI","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) History","BA (Hons.) Politics","BA (Hons.) Sociology","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"2:00","room":"NAB-205"},{"d":"Fri","t":"2:00","room":"NAB-205"}]},{"id":73,"title":"Venture Capital: Law and Practice","faculty":"Tanmay Amar & Siddharth Rao","cr":2,"conc":"Commercial","survey":false,"practice":false,"clinical":false,"el":["BALLB4th","BALLB5th","LLB 2","LLB 3","LLM General","LLM Commercial Law"],"s":[{"d":"Fri","t":"5:10","room":"OAB-301"},{"d":"Sat","t":"9:00","room":"OAB-103"}]},{"id":55,"title":"Violence, Collective Memory and Testimony","faculty":"Pramod Mandade","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) History","BA (Hons.) Sociology","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Tue","t":"5:10","room":"NAB-101"},{"d":"Fri","t":"5:10","room":"NAB-101"}]},{"id":38,"title":"“What is it like to be a bat?”: An introduction to epistemic values","faculty":"Harshvardhan Siddharthan","cr":2,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA (Hons.) Politics","BA (Hons.) Sociology","BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Mon","t":"2:00","room":"OAB-102"},{"d":"Wed","t":"5:10","room":"OAB-103"},{"d":"Thu","t":"2:00","room":"OAB-102"}]},{"id":8,"title":"What Makes Work? Labour, Leisure and the Modern World","faculty":"Megha Sharma","cr":4,"conc":"","survey":false,"practice":false,"clinical":false,"el":["BA-LLB 3rd Year","BALLB4th","BALLB5th","LLB 2","LLB 3","MPP","LLM General","LLM Criminal","LLM Commercial Law","LLM Law and Tech","LLM Public Law"],"s":[{"d":"Fri","t":"5:10","room":"NAB-102"}]}];
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat"];
+const DAYN = {Mon:"Monday",Tue:"Tuesday",Wed:"Wednesday",Thu:"Thursday",Fri:"Friday",Sat:"Saturday"};
+const BLOCKS = [{t:"9:00",label:"9:00 – 10:50 AM"},{t:"11:10",label:"11:10 AM – 1:00 PM"},{t:"2:00",label:"2:00 – 3:50 PM"},{t:"5:10",label:"5:10 – 7:00 PM"}];
+const BL = Object.fromEntries(BLOCKS.map(b=>[b.t,b.label]));
+const PROGS = [
+  {id:"ballb3", name:"BA-LLB", yr:"3rd year", col:"BA-LLB 3rd Year", core:3, el:1},
+  {id:"ballb4", name:"BA-LLB", yr:"4th year", col:"BALLB4th", core:2, el:2},
+  {id:"ballb5", name:"BA-LLB", yr:"5th year", col:"BALLB5th", core:0, el:4},
+  {id:"llb2", name:"LLB", yr:"2nd year", col:"LLB 2", core:3, el:1},
+  {id:"llb3", name:"LLB", yr:"3rd year", col:"LLB 3", core:2, el:2},
+  {id:"mpp2", name:"MPP", yr:"2nd year", col:"MPP", core:3, el:1},
+  {id:"llm", name:"LLM", yr:"", core:0, el:4, subLab:"Your stream",
+    subs:[{id:"gen",name:"General",col:"LLM General"},{id:"cri",name:"Criminal",col:"LLM Criminal",tag:"Criminal"},
+          {id:"com",name:"Commercial",col:"LLM Commercial Law",tag:"Commercial"},{id:"tec",name:"Law & Tech",col:"LLM Law and Tech",tag:"Law & Tech"},
+          {id:"pub",name:"Public Law",col:"LLM Public Law",tag:"Public"}]},
+  {id:"bah2", name:"BA (Hons.)", yr:"2nd year", core:2, el:2, subLab:"Your major",
+    subs:[{id:"his",name:"History",col:"BA (Hons.) History"},{id:"eco",name:"Economics",col:"BA (Hons.) Economics"},
+          {id:"pol",name:"Politics",col:"BA (Hons.) Politics"},{id:"soc",name:"Sociology",col:"BA (Hons.) Sociology"}]}
+];
+const ROLE = i => i===0 ? "Primary elective" : `Elective ${i+1}`;
+const byId = Object.fromEntries(DATA.map(e=>[e.id,e]));
+const used = new Set(); DATA.forEach(e=>e.s.forEach(s=>used.add(s.d+"|"+s.t)));
+const key = s => s.d+"|"+s.t;
+const norm = s => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g," ");
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const short = t => { const c=t.replace(/[“”"]/g,"").split(/:\s| - /)[0]; return c.length>48? c.slice(0,46).trim()+"…" : c; };
+
+let st = {prog:null, sub:null, count:null, picks:[], skip:{}};
+let filter="all", q="";
+try{ Object.assign(st, JSON.parse(localStorage.getItem("elective-planner-v2")||"{}")); }catch(e){}
+const save=()=>{ try{localStorage.setItem("elective-planner-v2",JSON.stringify(st));}catch(e){} };
+
+const prog = () => PROGS.find(p=>p.id===st.prog);
+const subObj = () => { const p=prog(); return p&&p.subs ? p.subs.find(s=>s.id===st.sub) : null; };
+function col(){ const p=prog(); if(!p) return null; if(p.subs){ const s=subObj(); return s? s.col : null; } return p.col; }
+const eligible = () => { const c=col(); return c? DATA.filter(e=>e.el.includes(c)) : []; };
+const ready = () => !!col() && !!st.count;
+
+// sessions that count for a course (respecting dropped sections for picked courses)
+const live = e => { const sk=st.skip[e.id]||[]; return e.s.filter(s=>!sk.includes(key(s))); };
+
+// rules
+function isConc(e){ const s=subObj(); return !!(s&&s.tag&&e.conc.split(",").some(x=>x.replace("*","").trim()===s.tag)); }
+function rules(){
+  const p=prog(); const picks=st.picks.map(id=>byId[id]);
+  if(p&&p.id==="llm"&&subObj()&&subObj().tag){
+    const c=picks.filter(isConc).length;
+    return [{label:`${subObj().name} concentration elective`, have:Math.min(c,1), need:1},{label:"General electives", have:Math.min(picks.length-Math.min(c,1),3), need:3}];
+  }
+  if(p&&p.id==="bah2"){
+    const pr=picks.filter(e=>e.practice).length;
+    return [{label:"Practice course", have:Math.min(pr,1), need:1},{label:"Elective course", have:Math.min(picks.length-Math.min(pr,1),1), need:1}];
+  }
+  return [];
+}
+
+function statusOf(e){
+  if(st.picks.includes(e.id)) return {type:"picked"};
+  const hits=[]; let same=null;
+  for(const pid of st.picks){
+    const p=byId[pid]; if(norm(p.title)===norm(e.title)) same=p;
+    const pk=new Set(live(p).map(key));
+    e.s.forEach(s=>{ if(pk.has(key(s))) hits.push({s,with:p}); });
+  }
+  if(hits.length) return {type:"clash",hits};
+  if(same) return {type:"same"};
+  return {type:"fit"};
+}
+
+function opt(label, pressed, onclick, small){
+  const b=document.createElement("button"); b.className="opt"; b.setAttribute("aria-pressed",String(pressed));
+  b.innerHTML=esc(label)+(small?`<small>${esc(small)}</small>`:""); b.onclick=onclick; return b;
+}
+
+function renderSteps(){
+  const pw=document.getElementById("progs"); pw.innerHTML="";
+  PROGS.forEach(p=>pw.appendChild(opt(p.name, st.prog===p.id, ()=>{
+    if(st.prog!==p.id){ st.prog=p.id; st.sub=null; st.count=p.el; track("select_programme",{programme:p.name+(p.yr?" "+p.yr:"")}); }
+    prune(); save(); render();
+  }, p.yr||"Choose stream")));
+  const p=prog(), sw=document.getElementById("subWrap"), ss=document.getElementById("subs");
+  ss.innerHTML="";
+  if(p&&p.subs){
+    sw.hidden=false; document.getElementById("subLab").textContent=p.subLab; ss.setAttribute("aria-label",p.subLab);
+    p.subs.forEach(s=>ss.appendChild(opt(s.name, st.sub===s.id, ()=>{ st.sub=s.id; track("select_stream",{programme:p.name,stream:s.name}); prune(); save(); render(); })));
+  } else sw.hidden=true;
+
+  const req=document.getElementById("req");
+  if(!p) req.textContent="Choose your programme to see which electives are open to you.";
+  else {
+    const name=`${p.name}${p.yr?" "+p.yr:""}`;
+    let txt=`${name}: ${p.core} core course${p.core===1?"":"s"} and ${p.el} elective${p.el===1?"":"s"}.`;
+    if(p.id==="llm") txt+=" General stream takes 4 general electives. Concentration students take 1 concentration elective plus 3 general electives.";
+    if(p.id==="bah2") txt+=" Your 2 electives are 1 practice course plus 1 elective course.";
+    if(p.subs&&!st.sub) txt+=` Now choose ${p.subLab.toLowerCase()}.`;
+    else if(col()) txt+=` ${eligible().length} electives are open to you.`;
+    req.textContent=txt;
+  }
+
+  document.getElementById("s2").classList.toggle("off",!col());
+  const cw=document.getElementById("counts"); cw.innerHTML="";
+  for(let n=1;n<=4;n++) cw.appendChild(opt(String(n), st.count===n, ()=>{ st.count=n; track("select_elective_count",{count:n}); st.picks=st.picks.slice(0,n); save(); render(); }, p&&n===p.el?"required":""));
+  document.getElementById("s3").classList.toggle("off",!ready());
+}
+
+function prune(){ const c=col(); st.picks=st.picks.filter(id=>c&&byId[id].el.includes(c)); }
+
+function renderTray(){
+  const t=document.getElementById("tray"); t.innerHTML=""; const n=st.count||1;
+  t.style.setProperty("--n",n);
+  for(let i=0;i<n;i++){
+    const e=byId[st.picks[i]]; const d=document.createElement("div");
+    d.className="slot "+(e?"k"+i:"empty");
+    if(e){
+      d.innerHTML=`<span class="role">${ROLE(i)}</span><span class="t">${esc(e.title)}</span><span class="f">${esc(e.faculty)}, ${e.cr} credits</span><button class="x" aria-label="Remove ${esc(e.title)}">×</button>`;
+      d.querySelector(".x").onclick=()=>remove(e.id);
+    } else d.innerHTML=`<span class="role">${ROLE(i)}</span><span class="t">${i===0?"Choose from the list below":(st.picks.length?"Add one that fits":"Pick a primary first")}</span>`;
+    t.appendChild(d);
+  }
+  const r=rules(), rw=document.getElementById("rules");
+  rw.innerHTML = r.map(x=>`<span class="${x.have>=x.need?"done":""}">${esc(x.label)}: ${x.have} of ${x.need}${x.have>=x.need?" ✓":""}</span>`).join("");
+  rw.style.display=r.length?"flex":"none";
+}
+
+function renderList(){
+  const ul=document.getElementById("list"); ul.innerHTML="";
+  const full=st.picks.length>=(st.count||0);
+  const rows=eligible().map(e=>({e,s:statusOf(e)})).filter(({e})=>!q||norm(e.title+" "+e.faculty).includes(q));
+  const counts={fit:0,clash:0,all:rows.length};
+  rows.forEach(r=>{ if(r.s.type==="fit") counts.fit++; if(r.s.type==="clash"||r.s.type==="same") counts.clash++; });
+  const has=st.picks.length>0;
+  if(!has&&filter!=="all") filter="all";
+  document.querySelectorAll(".seg button").forEach(b=>{
+    const f=b.dataset.f; b.textContent={fit:"Fits",clash:"Clashes",all:"All"}[f]+(has?` (${counts[f]})`:"");
+    b.disabled=!has&&f!=="all"; b.setAttribute("aria-pressed",String(f===filter));
+  });
+  document.getElementById("hint").textContent = !has ? `${counts.all} electives open to you. Choose your primary first.`
+    : full ? `You’ve picked all ${st.count}. Remove one to swap it, or change the number above.`
+    : `${counts.fit} fit with your picks; ${counts.clash} clash.`;
+
+  const order={picked:0,fit:1,same:2,clash:3};
+  let shown=rows.filter(r=>filter==="all"||(filter==="fit"?r.s.type==="fit":(r.s.type==="clash"||r.s.type==="same")));
+  if(has) shown.sort((a,b)=>order[a.s.type]-order[b.s.type]);
+  if(!shown.length){ ul.innerHTML=`<li class="empty-list">${q?"No electives match that search.":"Nothing here."}</li>`; return; }
+
+  const r=rules(); const p=prog();
+  for(const {e,s} of shown){
+    const li=document.createElement("li");
+    const bad=s.type==="clash"||s.type==="same";
+    li.className="item"+(bad?" clash":"")+(s.type==="picked"?" picked":"");
+    const hitKeys=new Set((s.hits||[]).map(h=>key(h.s)));
+    const multi=e.s.length>2, picked=s.type==="picked";
+    const sk=st.skip[e.id]||[];
+    const chips = e.s.length ? e.s.map(x=> picked&&multi
+        ? `<button class="chip" data-tog="${e.id}" data-k="${key(x)}" aria-pressed="${!sk.includes(key(x))}">${x.d} ${BL[x.t]}</button>`
+        : `<span class="chip${hitKeys.has(key(x))?" hit":""}">${x.d} ${BL[x.t]}</span>`).join("")
+      : `<span class="chip">Time not in the timetable</span>`;
+    const tags=[`<span class="tag">${e.cr} credits</span>`];
+    if(isConc(e)) tags.push(`<span class="tag conc">${esc(subObj().name)} concentration</span>`);
+    if(p&&p.id==="bah2"&&e.practice) tags.push(`<span class="tag prac">Practice course</span>`);
+    if(e.clinical) tags.push(`<span class="tag">Clinical</span>`);
+    if(e.survey) tags.push(`<span class="tag">Survey elective</span>`);
+
+    let status="",btn="",note="";
+    if(multi) note = picked ? `<p class="note">Listed in ${e.s.length} slots, likely separate sections. Tap a slot to drop it if it isn’t your section.</p>`
+                            : `<p class="note">Listed in ${e.s.length} slots, likely separate sections. Clashes are checked against all of them.</p>`;
+    if(!e.s.length) note=`<p class="note">Not in the elective timetable, so clashes can’t be checked.</p>`;
+    if(picked){ status=`<p class="status ok">In your timetable as ${ROLE(st.picks.indexOf(e.id)).toLowerCase()}</p>`; btn=`<button class="act ghost" data-rm="${e.id}">Remove</button>`; }
+    else if(s.type==="clash"){
+      const w=[...new Map(s.hits.map(h=>[h.with.id,h.with])).values()].map(x=>short(x.title)).join(" and ");
+      const when=[...new Set(s.hits.map(h=>`${h.s.d} ${h.s.t}`))].join(", ");
+      status=`<p class="status bad">Clashes with ${esc(w)} (${when})</p>`; btn=`<button class="act" disabled>Clashes</button>`;
+    } else if(s.type==="same"){ status=`<p class="status bad">Already in your picks</p>`; btn=`<button class="act" disabled>Chosen</button>`; }
+    else {
+      let extra="";
+      if(has&&r.length){
+        const open=r.filter(x=>x.have<x.need);
+        const left=(st.count||0)-st.picks.length;
+        if(p.id==="bah2"&&st.picks.some(id=>byId[id].practice)&&e.practice) extra=" You already have a practice course.";
+        if(p.id==="bah2"&&!st.picks.some(id=>byId[id].practice)&&!e.practice&&left===1) extra=" You still need a practice course.";
+        if(p.id==="llm"&&!st.picks.some(id=>isConc(byId[id]))&&!isConc(e)&&left===1) extra=` You still need a ${subObj().name} concentration elective.`;
+      }
+      if(has) status=`<p class="status ${extra?"bad":"ok"}">Fits with your picks.${esc(extra)}</p>`;
+      btn=`<button class="act" data-add="${e.id}" ${full?"disabled":""}>${has?"Add":"Choose as primary"}</button>`;
+    }
+    li.innerHTML=`<div><p class="ct">${esc(e.title)}</p><p class="fac">${esc(e.faculty)}</p></div>${btn}<div class="tags">${tags.join("")}</div><div class="times">${chips}</div>${note}${status}`;
+    ul.appendChild(li);
+  }
+}
+
+function renderWeek(){
+  const m={};
+  st.picks.forEach((id,i)=>live(byId[id]).forEach(s=>{(m[key(s)] ||= []).push({e:byId[id],s,i});}));
+  const cell=x=>`<div class="cls c${x.i}"><b>${esc(short(x.e.title))}</b>${esc(x.s.room||"Room TBA")}</div>`;
+  let h=`<thead><tr><th></th>${DAYS.map(d=>`<th scope="col">${DAYN[d]}</th>`).join("")}</tr></thead><tbody>`;
+  for(const b of BLOCKS){
+    h+=`<tr><th scope="row">${b.label}</th>`;
+    for(const d of DAYS){ const k=d+"|"+b.t; h+= used.has(k)? `<td>${(m[k]||[]).map(cell).join("")}</td>` : `<td class="na" aria-label="No electives scheduled"></td>`; }
+    h+="</tr>";
+  }
+  document.getElementById("grid").innerHTML=h+"</tbody>";
+  const a=document.getElementById("agenda"); a.innerHTML="";
+  for(const d of DAYS){
+    const items=BLOCKS.flatMap(b=>(m[d+"|"+b.t]||[]).map(x=>({x,b})));
+    const div=document.createElement("div"); div.className="day";
+    div.innerHTML=`<h3>${DAYN[d]}</h3>`+(items.length?items.map(({x,b})=>`<div class="cls c${x.i}"><b>${esc(short(x.e.title))}</b>${b.label}, ${esc(x.s.room||"Room TBA")}</div>`).join(""):`<span class="free">No elective classes</span>`);
+    a.appendChild(div);
+  }
+  const nt=st.picks.map(id=>byId[id]).filter(e=>!e.s.length);
+  document.getElementById("nott").innerHTML = nt.length? `<p class="hint">Not in the timetable: ${nt.map(e=>esc(e.title)).join(", ")}.</p>`:"";
+  const n=st.picks.reduce((s,id)=>s+live(byId[id]).length,0);
+  const cr=st.picks.reduce((s,id)=>s+byId[id].cr,0);
+  document.getElementById("weeksum").textContent = st.picks.length
+    ? `${st.picks.length} of ${st.count} elective${st.count>1?"s":""}, ${cr} credits, ${n} class block${n===1?"":"s"} a week.`
+    : "Your chosen electives will appear here.";
+  document.getElementById("barTxt").textContent = ready()? `${st.picks.length} of ${st.count} chosen` : "Set up steps 1 and 2";
+  document.getElementById("clear").style.visibility=st.picks.length?"visible":"hidden";
+}
+
+let tt; function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2200);}
+function track(name,params){ try{ if(typeof gtag==="function") gtag("event",name,params||{}); }catch(e){} }
+function add(id){ if(st.picks.length>=st.count) return; st.picks.push(id); track(st.picks.length===1?"choose_primary":"add_elective",{course:byId[id].title,programme:(prog()||{}).name||""}); if(st.picks.length===st.count) track("complete_selection",{count:st.count}); save(); if(st.picks.length===1) filter="fit"; render();
+  toast(st.picks.length===1?"Primary set. Showing electives that fit.":st.picks.length===st.count?"All electives chosen.":"Added to your week."); }
+function remove(id){ st.picks=st.picks.filter(x=>x!==id); delete st.skip[id]; save(); render(); toast("Removed."); }
+function render(){ renderSteps(); renderTray(); renderList(); renderWeek(); }
+
+document.getElementById("list").addEventListener("click",ev=>{
+  const a=ev.target.closest("[data-add]"), r=ev.target.closest("[data-rm]"), g=ev.target.closest("[data-tog]");
+  if(a) add(+a.dataset.add); if(r) remove(+r.dataset.rm);
+  if(g){ const id=+g.dataset.tog, k=g.dataset.k, sk=st.skip[id]||(st.skip[id]=[]);
+    const i=sk.indexOf(k); if(i>=0) sk.splice(i,1); else if(sk.length < byId[id].s.length-1) sk.push(k); else { toast("Keep at least one slot."); return; }
+    save(); render(); }
+});
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{filter=b.dataset.f;renderList();});
+document.getElementById("q").addEventListener("input",e=>{q=norm(e.target.value).trim();renderList();});
+document.getElementById("clear").onclick=()=>{st.picks=[];st.skip={};save();filter="all";render();};
+document.getElementById("barBtn").onclick=()=>document.getElementById(ready()?"week":"s1").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+if(st.picks.length) filter="fit";
+prune(); render();
+</script>
+</body>
+</html>
